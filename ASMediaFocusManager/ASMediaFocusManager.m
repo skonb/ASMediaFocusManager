@@ -238,8 +238,8 @@ static CGFloat const kSwipeOffset = 100;
         return nil;
     }
 
-    viewController = [[ASMediaFocusController alloc] initWithNibName:nil bundle:nil];
-    [self installDefocusActionOnFocusViewController:viewController];
+    viewController = [[ASMediaFocusController alloc] initWithNibName:@"ASMediaFocusController" bundle:[NSBundle bundleForClass:[ASMediaFocusController class]]];
+		[self installDefocusActionOnFocusViewController:viewController];
     
     viewController.titleLabel.text = [self.delegate mediaFocusManager:self titleForView:mediaView];
     viewController.mainImageView.image = image;
