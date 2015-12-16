@@ -44,18 +44,29 @@ static char const kPlayerPresentationSizeContext;
 
 @implementation ASMediaFocusController
 
+
+-(void)initializeGestureRecognizers{
+    self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
+    self.doubleTapGesture.numberOfTapsRequired = 2;
+    self.controlMargin = kDefaultControlMargin;
+    
+    self.tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
+    [self.tapGesture requireGestureRecognizerToFail:self.doubleTapGesture];
+    [self.view addGestureRecognizer:self.tapGesture];
+}
+
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
+    if ([super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        [self initializeGestureRecognizers];
+    }
+    return self;
+}
+
 - (id)init
 {
     if ((self = [super init])) {
-        self.doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
-        self.doubleTapGesture.numberOfTapsRequired = 2;
-        self.controlMargin = kDefaultControlMargin;
-        
-        self.tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
-        [self.tapGesture requireGestureRecognizerToFail:self.doubleTapGesture];
-        [self.view addGestureRecognizer:self.tapGesture];
+        [self initializeGestureRecognizers];
     }
-
     return self;
 }
 
