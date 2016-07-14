@@ -33,6 +33,7 @@ static CGFloat const kSwipeOffset = 100;
 @property (nonatomic, assign) BOOL isZooming;
 @property (nonatomic, strong) ASVideoBehavior *videoBehavior;
 @property (nonatomic, strong) UIButton *doneButton;
+@property (nonatomic, strong) UIPageControl *pageControl;
 @end
 
 @implementation ASMediaFocusManager
@@ -110,17 +111,23 @@ static CGFloat const kSwipeOffset = 100;
     [self.doneButton removeFromSuperview];
 
     self.doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.doneButton setTitle:NSLocalizedString(@"Done", @"Done") forState:UIControlStateNormal];
+    [self.doneButton setImage:[UIImage imageNamed:@"ic_photo_close" inBundle:[NSBundle bundleForClass:[ASMediaFocusManager class]] compatibleWithTraitCollection:nil] forState:UIControlStateNormal];
     [self.doneButton addTarget:self action:@selector(handleDefocusGesture:) forControlEvents:UIControlEventTouchUpInside];
-    self.doneButton.backgroundColor = [UIColor colorWithWhite:0 alpha:0.5];
-    [self.doneButton sizeToFit];
-    self.doneButton.frame = CGRectInset(self.doneButton.frame, -20, -4);
-    self.doneButton.layer.borderWidth = 2;
-    self.doneButton.layer.cornerRadius = 4;
-    self.doneButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.doneButton.center = CGPointMake(self.mediaPageViewController.view.bounds.size.width - self.doneButton.bounds.size.width/2 - 10, self.doneButton.bounds.size.height/2 + 20);
-    self.doneButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin;
+    self.doneButton.frame = CGRectMake(20, 10, 44, 44);
+    self.doneButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
     [self.mediaPageViewController.view addSubview:self.doneButton];
+}
+
+- (void)addPageControl{
+    [self.pageControl removeFromSuperview];
+    self.pageControl = [UIPageControl new];
+    self.pageControl.currentPageIndicatorTintColor = [UIColor colorWithRed:0 green:164.0/255.0 blue:218.0/255.0 alpha:1];
+    self.pageControl.pageIndicatorTintColor = [UIColor colorWithRed:128.0/255.0 green:128.0/255.00 blue:128.0/255.0 alpha:1];
+    self.pageControl.center = ^CGPoint(CGPoint point){
+        point.y = self.mediaPageViewController.view.bounds.size.height - self.pageControl.frame.size.height - 20;
+        return point;
+    }(self.mediaPageViewController.view.center);
+    [self.mediaPageViewController.view addSubview:self.pageControl];
 }
 
 #pragma mark - Utilities
@@ -209,6 +216,7 @@ static CGFloat const kSwipeOffset = 100;
 
     if (!self.isDefocusingWithTap) {
         [self addDoneButton];
+        [self addPageControl];
     }
 
     self.rotatingViewController = [[ASMediaRotatingViewController alloc] initWithViewController:self.mediaPageViewController];
@@ -230,8 +238,11 @@ static CGFloat const kSwipeOffset = 100;
         } else {
             self.mediaInfoItems = mediaInfoItems;
         }
+        self.pageControl.numberOfPages = self.mediaInfoItems.count;
+        self.pageControl.hidden = false;
     } else {
         self.mediaInfoItems = @[mediaInfo];
+        self.pageControl.hidden = true;
     }
 
     // This should be called after swipe gesture is installed to make sure the nav bar doesn't hide before animation begins.
@@ -571,6 +582,10 @@ static CGFloat const kSwipeOffset = 100;
     [self.delegate mediaFocusManager:self loadMediaForInfo:info completion:completion];
 }
 
+- (void)focusControllerRequiredClose:(ASMediaFocusController *)controller{
+    [self endFocusing];
+}
+
 #pragma mark - UIPageViewControllerDataSource
 
 - (UIViewController *)pageViewController:(UIPageViewController *)pageViewController viewControllerBeforeViewController:(UIViewController *)viewController
@@ -609,6 +624,8 @@ static CGFloat const kSwipeOffset = 100;
 
 - (void)pageViewController:(UIPageViewController *)pageViewController willTransitionToViewControllers:(NSArray *)pendingViewControllers
 {
+    int index = [self.mediaInfoItems indexOfObject:((ASMediaFocusController*)pendingViewControllers[0]).info];
+    self.pageControl.currentPage = index;
     [self.focusViewController pauseVideo]; // pauses the current focus controller before transitioning
 }
 
@@ -629,5 +646,6 @@ static CGFloat const kSwipeOffset = 100;
 {
     return UIInterfaceOrientationMaskAll;
 }
+
 
 @end
