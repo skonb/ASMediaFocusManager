@@ -239,7 +239,7 @@ static CGFloat const kSwipeOffset = 100;
             self.mediaInfoItems = mediaInfoItems;
         }
         self.pageControl.numberOfPages = self.mediaInfoItems.count;
-        self.pageControl.hidden = false;
+        self.pageControl.hidden = self.pageControl.numberOfPages <= 1;
     } else {
         self.mediaInfoItems = @[mediaInfo];
         self.pageControl.hidden = true;
